@@ -1,10 +1,22 @@
+use std::fmt::{Display, Formatter};
+
 use crate::resources::Resources;
 
-#[derive(Ord, PartialOrd, Eq, PartialEq, Clone)]
+#[derive(Ord, PartialOrd, Eq, PartialEq, Clone, Debug)]
 pub enum BuildingType {
     Metal,
     Crystal,
     Deuterium,
+}
+
+impl Display for BuildingType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            BuildingType::Metal => write!(f, "Metal"),
+            BuildingType::Crystal => write!(f, "Crystal"),
+            BuildingType::Deuterium => write!(f, "Deuterium"),
+        }
+    }
 }
 
 impl BuildingType {
@@ -44,8 +56,8 @@ impl BuildingType {
                 deuterium: 0,
             },
             BuildingType::Crystal => Resources {
-                metal: 20 * level * ticks,
-                crystal: 10 * level * ticks,
+                metal: 0,
+                crystal: 20 * level * ticks,
                 deuterium: 0,
             },
             BuildingType::Deuterium => Resources {

@@ -1,10 +1,11 @@
-use std::time::{SystemTime, UNIX_EPOCH};
+use web_time::UNIX_EPOCH;
 
 use crate::{building_type::BuildingType, error::*, planet::Planet, protocol::Protocol};
 
+#[derive(Clone)]
 pub struct Game {
     player_id: usize,
-    planets: Vec<Planet>,
+    pub planets: Vec<Planet>,
 }
 
 impl Game {
@@ -16,10 +17,12 @@ impl Game {
     }
 
     pub fn tick(&mut self) -> Result<()> {
-        let now = SystemTime::now()
+        let now = web_time::SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs() as usize;
+
+        // console_log(format!("Ticking game at {}", now).as_str());
 
         for planet in &mut self.planets {
             planet.tick(now)?;
@@ -55,5 +58,17 @@ impl Game {
         self.planets[planet_id].upgrade_building(building_type)?;
 
         Ok(())
+    }
+
+    pub fn add_planet(&mut self, planet: Planet) {
+        self.planets.push(planet);
+    }
+
+    pub fn planets(&self) -> &Vec<Planet> {
+        &self.planets
+    }
+
+    pub fn set_planets(&mut self, planets: Vec<Planet>) {
+        self.planets = planets;
     }
 }

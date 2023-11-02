@@ -2,15 +2,43 @@ use std::collections::BTreeMap;
 
 use crate::{build_queue::BuildQueue, building_type::BuildingType, error::*, resources::Resources};
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Planet {
+    id: usize,
     resources: Resources,
-    buildings: BTreeMap<BuildingType, usize>,
-    build_queue: BuildQueue,
+    pub buildings: BTreeMap<BuildingType, usize>,
+    pub build_queue: BuildQueue,
     last_update: usize,
 }
 
 impl Planet {
+    pub fn id(&self) -> usize {
+        self.id
+    }
+
+    pub fn new(id: usize) -> Self {
+        Planet {
+            id,
+            resources: Resources::default(),
+            buildings: vec![
+                (BuildingType::Metal, 0),
+                (BuildingType::Crystal, 0),
+                (BuildingType::Deuterium, 0),
+            ]
+            .into_iter()
+            .collect(),
+            build_queue: BuildQueue::default(),
+            last_update: web_time::SystemTime::now()
+                .duration_since(web_time::UNIX_EPOCH)
+                .unwrap()
+                .as_secs() as usize,
+        }
+    }
+
+    pub fn resources(&self) -> Resources {
+        self.resources.clone()
+    }
+
     pub fn upgrade_building(&mut self, building_type: BuildingType) -> Result<()> {
         let current_level = *self.buildings.get(&building_type).unwrap_or(&0);
 
@@ -45,8 +73,22 @@ impl Planet {
             *current_level += 1;
         }
 
+        for (building, level) in &self.buildings {
+            let produced = building.produced(*level, now - self.last_update);
+
+            self.resources += produced;
+        }
+
         self.last_update = now;
 
         Ok(())
+    }
+
+    pub fn building_level(&self, building_type: BuildingType) -> usize {
+        *self.buildings.get(&building_type).unwrap_or(&0)
+    }
+
+    pub fn last_update(&self) -> usize {
+        self.last_update
     }
 }
