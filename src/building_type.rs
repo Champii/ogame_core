@@ -1,8 +1,10 @@
 use std::fmt::{Display, Formatter};
 
+use serde::{Deserialize, Serialize};
+
 use crate::resources::Resources;
 
-#[derive(Ord, PartialOrd, Eq, PartialEq, Clone, Debug)]
+#[derive(Ord, PartialOrd, Eq, PartialEq, Clone, Debug, Serialize, Deserialize)]
 pub enum BuildingType {
     Metal,
     Crystal,

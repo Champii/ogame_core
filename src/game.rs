@@ -1,8 +1,9 @@
+use serde::{Deserialize, Serialize};
 use web_time::UNIX_EPOCH;
 
 use crate::{building_type::BuildingType, error::*, planet::Planet, protocol::Protocol};
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Game {
     player_id: usize,
     pub planets: Vec<Planet>,
@@ -21,8 +22,6 @@ impl Game {
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs() as usize;
-
-        // console_log(format!("Ticking game at {}", now).as_str());
 
         for planet in &mut self.planets {
             planet.tick(now)?;
@@ -55,6 +54,8 @@ impl Game {
         planet_id: usize,
         building_type: BuildingType,
     ) -> Result<()> {
+        self.tick()?;
+
         self.planets[planet_id].upgrade_building(building_type)?;
 
         Ok(())

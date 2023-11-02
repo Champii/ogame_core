@@ -1,12 +1,14 @@
+use serde::{Deserialize, Serialize};
+
 use crate::{building_type::BuildingType, error::Result};
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BuildQueueItem {
     pub r#type: BuildingType,
     pub finish_date: usize,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Default)]
+#[derive(Clone, Debug, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct BuildQueue {
     pub items: Vec<BuildQueueItem>,
 }

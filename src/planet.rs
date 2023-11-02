@@ -1,8 +1,10 @@
 use std::collections::BTreeMap;
 
+use serde::{Deserialize, Serialize};
+
 use crate::{build_queue::BuildQueue, building_type::BuildingType, error::*, resources::Resources};
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Planet {
     id: usize,
     resources: Resources,
@@ -40,7 +42,13 @@ impl Planet {
     }
 
     pub fn upgrade_building(&mut self, building_type: BuildingType) -> Result<()> {
-        let current_level = *self.buildings.get(&building_type).unwrap_or(&0);
+        let mut current_level = *self.buildings.get(&building_type).unwrap_or(&0);
+
+        for building in self.build_queue.items.iter() {
+            if building.r#type == building_type {
+                current_level += 1;
+            }
+        }
 
         let cost = building_type.cost(current_level);
 
