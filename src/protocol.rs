@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{building_type::BuildingType, game::Game};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub enum Protocol {
     // Server -> Client
     Game(Game),

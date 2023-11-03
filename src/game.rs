@@ -3,7 +3,7 @@ use web_time::UNIX_EPOCH;
 
 use crate::{building_type::BuildingType, error::*, planet::Planet, protocol::Protocol};
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Game {
     player_id: usize,
     pub planets: Vec<Planet>,
