@@ -1,54 +1,48 @@
-use std::{
-    cmp::Ordering,
-    ops::{AddAssign, SubAssign},
-};
+use std::ops::{AddAssign, SubAssign};
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Resources {
-    pub metal: usize,
-    pub crystal: usize,
-    pub deuterium: usize,
+    pub metal: f64,
+    pub crystal: f64,
+    pub deuterium: f64,
 }
 
-impl Ord for Resources {
-    fn cmp(&self, other: &Self) -> Ordering {
-        match self.metal.cmp(&other.metal) {
-            Ordering::Equal | Ordering::Greater => match self.crystal.cmp(&other.crystal) {
-                Ordering::Equal | Ordering::Greater => self.deuterium.cmp(&other.deuterium),
-                other => other,
-            },
-            other => other,
+impl Resources {
+    pub fn new(metal: f64, crystal: f64, deuterium: f64) -> Self {
+        Resources {
+            metal,
+            crystal,
+            deuterium,
         }
     }
-}
 
-impl PartialOrd for Resources {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.metal
-            .partial_cmp(&other.metal)
-            .and_then(|metal| match metal {
-                Ordering::Equal | Ordering::Greater => self
-                    .crystal
-                    .partial_cmp(&other.crystal)
-                    .and_then(|crystal| match crystal {
-                        Ordering::Equal | Ordering::Greater => {
-                            self.deuterium.partial_cmp(&other.deuterium)
-                        }
-                        other => Some(other),
-                    }),
-                other => Some(other),
-            })
+    pub fn has_enough(&self, other: &Self) -> bool {
+        self.metal >= other.metal
+            && self.crystal >= other.crystal
+            && self.deuterium >= other.deuterium
+    }
+
+    pub fn pay(&mut self, other: &Self) {
+        self.metal -= other.metal;
+        self.crystal -= other.crystal;
+        self.deuterium -= other.deuterium;
+    }
+
+    pub fn gain(&mut self, other: &Self) {
+        self.metal += other.metal;
+        self.crystal += other.crystal;
+        self.deuterium += other.deuterium;
     }
 }
 
 impl Default for Resources {
     fn default() -> Self {
         Resources {
-            metal: 120,
-            crystal: 40,
-            deuterium: 0,
+            metal: 5120.0,
+            crystal: 1040.0,
+            deuterium: 0.0,
         }
     }
 }

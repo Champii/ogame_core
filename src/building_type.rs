@@ -25,47 +25,52 @@ impl BuildingType {
     pub fn cost(&self, level: usize) -> Resources {
         match self {
             BuildingType::Metal => Resources {
-                metal: 60 * 2usize.pow(level as u32),
-                crystal: 15 * 2usize.pow(level as u32),
-                deuterium: 0,
+                metal: 60.0 * 1.5f64.powi(level as i32 - 1) as f64,
+                crystal: 15.0 * 1.5f64.powi(level as i32 - 1) as f64,
+                deuterium: 0.0,
             },
             BuildingType::Crystal => Resources {
-                metal: 48 * 2usize.pow(level as u32),
-                crystal: 24 * 2usize.pow(level as u32),
-                deuterium: 0,
+                metal: 48.0 * 1.6f64.powi(level as i32 - 1) as f64,
+                crystal: 24.0 * 1.6f64.powi(level as i32 - 1) as f64,
+                deuterium: 0.0,
             },
             BuildingType::Deuterium => Resources {
-                metal: 225 * 2usize.pow(level as u32),
-                crystal: 75 * 2usize.pow(level as u32),
-                deuterium: 0,
+                metal: 225.0 * 1.5f64.powi(level as i32 - 1) as f64,
+                crystal: 75.0 * 1.5f64.powi(level as i32 - 1) as f64,
+                deuterium: 0.0,
             },
         }
     }
 
     pub fn build_time(&self, level: usize) -> usize {
-        match self {
-            BuildingType::Metal => 1 * 2usize.pow(level as u32),
-            BuildingType::Crystal => 1 * 2usize.pow(level as u32),
-            BuildingType::Deuterium => 1 * 2usize.pow(level as u32),
-        }
+        let cost = self.cost(level);
+
+        let build_time =
+            (cost.metal + cost.crystal) / (2500.0 * crate::UNIVERSE_SPEED as f64) * 3600.0;
+
+        build_time.ceil() as usize
     }
 
     pub fn produced(&self, level: usize, ticks: usize) -> Resources {
         match self {
             BuildingType::Metal => Resources {
-                metal: 30 * level * ticks,
-                crystal: 0,
-                deuterium: 0,
+                metal: 30.0 * level as f64 * (1.1f64.powi(level as i32)) * ticks as f64 / 3600.0
+                    * crate::UNIVERSE_SPEED as f64,
+                crystal: 0.0,
+                deuterium: 0.0,
             },
             BuildingType::Crystal => Resources {
-                metal: 0,
-                crystal: 20 * level * ticks,
-                deuterium: 0,
+                metal: 0.0,
+                crystal: 20.0 * level as f64 * (1.1f64.powi(level as i32)) * ticks as f64 / 3600.0
+                    * crate::UNIVERSE_SPEED as f64,
+                deuterium: 0.0,
             },
             BuildingType::Deuterium => Resources {
-                metal: 0,
-                crystal: 0,
-                deuterium: 10 * level * ticks,
+                metal: 0.0,
+                crystal: 0.0,
+                deuterium: 10.0 * level as f64 * (1.1f64.powi(level as i32)) * ticks as f64
+                    / 3600.0
+                    * crate::UNIVERSE_SPEED as f64,
             },
         }
     }

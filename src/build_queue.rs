@@ -35,6 +35,20 @@ impl BuildQueue {
         Ok(solved)
     }
 
+    pub fn calc_tick_until_first_completion(&self, now: usize) -> usize {
+        let first_finish_date = self
+            .items
+            .first()
+            .map(|item| item.finish_date)
+            .unwrap_or(now);
+
+        if first_finish_date < now {
+            first_finish_date
+        } else {
+            now
+        }
+    }
+
     pub fn get_solved_elements(&self, now: usize) -> Vec<BuildingType> {
         self.items
             .iter()

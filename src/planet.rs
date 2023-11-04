@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{build_queue::BuildQueue, building_type::BuildingType, error::*, resources::Resources};
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Planet {
     id: usize,
     resources: Resources,
@@ -50,7 +50,7 @@ impl Planet {
             }
         }
 
-        let cost = building_type.cost(current_level);
+        let cost = building_type.cost(current_level + 1);
 
         self.pay(cost)?;
 
@@ -59,12 +59,8 @@ impl Planet {
         Ok(())
     }
 
-    pub fn has_enough(&self, cost: &Resources) -> bool {
-        self.resources >= *cost
-    }
-
     pub fn pay(&mut self, cost: Resources) -> Result<()> {
-        if !self.has_enough(&cost) {
+        if !self.resources.has_enough(&cost) {
             return Err(Error::NotEnoughResources);
         }
 
@@ -74,6 +70,21 @@ impl Planet {
     }
 
     pub fn tick(&mut self, now: usize) -> Result<()> {
+        let new_tick = self.build_queue.calc_tick_until_first_completion(now);
+
+        self.update_resources(new_tick)?;
+        self.process_build_queue(new_tick)?;
+
+        self.last_update = new_tick;
+
+        if now > new_tick {
+            self.tick(now)?;
+        }
+
+        Ok(())
+    }
+
+    fn process_build_queue(&mut self, now: usize) -> Result<()> {
         let buildings_update = self.build_queue.tick(now)?;
 
         for building in buildings_update {
@@ -81,13 +92,15 @@ impl Planet {
             *current_level += 1;
         }
 
+        Ok(())
+    }
+
+    fn update_resources(&mut self, now: usize) -> Result<()> {
         for (building, level) in &self.buildings {
             let produced = building.produced(*level, now - self.last_update);
 
             self.resources += produced;
         }
-
-        self.last_update = now;
 
         Ok(())
     }
