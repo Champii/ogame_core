@@ -1,20 +1,30 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{building_type::BuildingType, error::Result};
+use crate::{build_time_trait::BuildTime, error::Result};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct BuildQueueItem {
-    pub r#type: BuildingType,
+pub struct BuildQueueItem<T> {
+    pub r#type: T,
     pub finish_date: usize,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Default, Serialize, Deserialize)]
-pub struct BuildQueue {
-    pub items: Vec<BuildQueueItem>,
+pub struct BuildQueue<T>
+where
+    T: BuildTime,
+{
+    pub items: Vec<BuildQueueItem<T>>,
 }
 
-impl BuildQueue {
-    pub fn push(&mut self, item: BuildingType, level: usize) {
+impl<T> BuildQueue<T>
+where
+    T: BuildTime + Clone,
+{
+    pub fn new() -> Self {
+        BuildQueue { items: vec![] }
+    }
+
+    pub fn push(&mut self, item: T, level: usize) {
         let finish_date = self.items.last().map(|item| item.finish_date).unwrap_or(
             web_time::SystemTime::now()
                 .duration_since(web_time::UNIX_EPOCH)
@@ -28,7 +38,7 @@ impl BuildQueue {
         });
     }
 
-    pub fn tick(&mut self, now: usize) -> Result<Vec<BuildingType>> {
+    pub fn tick(&mut self, now: usize) -> Result<Vec<T>> {
         let solved = self.get_solved_elements(now);
         self.items = self.items.drain(solved.len()..).collect();
 
@@ -49,7 +59,7 @@ impl BuildQueue {
         }
     }
 
-    pub fn get_solved_elements(&self, now: usize) -> Vec<BuildingType> {
+    pub fn get_solved_elements(&self, now: usize) -> Vec<T> {
         self.items
             .iter()
             .filter(|item| item.finish_date <= now)

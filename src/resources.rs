@@ -1,8 +1,8 @@
-use std::ops::{AddAssign, SubAssign};
+use std::ops::{AddAssign, Mul, SubAssign};
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Resources {
     pub metal: f64,
     pub crystal: f64,
@@ -37,16 +37,6 @@ impl Resources {
     }
 }
 
-impl Default for Resources {
-    fn default() -> Self {
-        Resources {
-            metal: 5120.0,
-            crystal: 1040.0,
-            deuterium: 0.0,
-        }
-    }
-}
-
 impl SubAssign for Resources {
     fn sub_assign(&mut self, rhs: Self) {
         self.metal -= rhs.metal;
@@ -60,5 +50,17 @@ impl AddAssign for Resources {
         self.metal += rhs.metal;
         self.crystal += rhs.crystal;
         self.deuterium += rhs.deuterium;
+    }
+}
+
+impl Mul<f64> for Resources {
+    type Output = Self;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Resources {
+            metal: self.metal * rhs,
+            crystal: self.crystal * rhs,
+            deuterium: self.deuterium * rhs,
+        }
     }
 }
