@@ -8,6 +8,18 @@ pub struct BuildQueueItem<T> {
     pub finish_date: usize,
 }
 
+impl<T> BuildQueueItem<T>
+where
+    T: BuildTime,
+{
+    pub fn new(r#type: T, finish_date: usize) -> Self {
+        BuildQueueItem {
+            r#type,
+            finish_date,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct BuildQueue<T>
 where
@@ -20,8 +32,8 @@ impl<T> BuildQueue<T>
 where
     T: BuildTime + Clone,
 {
-    pub fn new() -> Self {
-        BuildQueue { items: vec![] }
+    pub fn new(items: Vec<BuildQueueItem<T>>) -> Self {
+        BuildQueue { items }
     }
 
     pub fn push(&mut self, item: T, level: usize) {

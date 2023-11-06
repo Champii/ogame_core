@@ -3,40 +3,49 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    build_cost_trait::BuildCost, build_queue::BuildQueue, building_type::BuildingType, error::*,
-    resources::Resources, ship_type::ShipType,
+    build_cost_trait::BuildCost,
+    build_queue::BuildQueue,
+    building_type::BuildingType,
+    coordinates::Coordinates,
+    error::*,
+    flight::{Flight, MissionType},
+    resources::Resources,
+    ship_hangar::ShipHangar,
+    ship_type::ShipType,
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Planet {
-    pub id: usize,
+    pub id: String,
+    pub coordinates: Coordinates,
     pub resources: Resources,
     pub buildings: BTreeMap<BuildingType, usize>,
-    pub ships: BTreeMap<ShipType, usize>,
+    pub ships: ShipHangar,
     pub build_queue: BuildQueue<BuildingType>,
     pub ship_queue: BuildQueue<ShipType>,
     pub last_update: usize,
 }
 
 impl Planet {
-    pub fn new(id: usize) -> Self {
+    pub fn new(
+        id: String,
+        coordinates: Coordinates,
+        resources: Resources,
+        buildings: BTreeMap<BuildingType, usize>,
+        ships: ShipHangar,
+        build_queue: BuildQueue<BuildingType>,
+        ship_queue: BuildQueue<ShipType>,
+        last_update: usize,
+    ) -> Self {
         Planet {
             id,
-            resources: Resources::default(),
-            buildings: vec![
-                (BuildingType::Metal, 0),
-                (BuildingType::Crystal, 0),
-                (BuildingType::Deuterium, 0),
-            ]
-            .into_iter()
-            .collect(),
-            ships: BTreeMap::new(),
-            build_queue: BuildQueue::new(),
-            ship_queue: BuildQueue::new(),
-            last_update: web_time::SystemTime::now()
-                .duration_since(web_time::UNIX_EPOCH)
-                .unwrap()
-                .as_secs() as usize,
+            coordinates,
+            resources,
+            buildings,
+            ships,
+            build_queue,
+            ship_queue,
+            last_update,
         }
     }
 
@@ -109,7 +118,7 @@ impl Planet {
         let ships_update = self.ship_queue.tick(now)?;
 
         for ship in ships_update {
-            let current_amount = self.ships.get_mut(&ship).unwrap();
+            let current_amount = self.ships.ships.get_mut(&ship).unwrap();
             *current_amount += 1;
         }
 
@@ -128,5 +137,40 @@ impl Planet {
 
     pub fn building_level(&self, building_type: BuildingType) -> usize {
         *self.buildings.get(&building_type).unwrap_or(&0)
+    }
+
+    pub fn ships(&self) -> &ShipHangar {
+        &self.ships
+    }
+    pub fn received_flight(&mut self, flight: Flight) -> Result<()> {
+        let now = web_time::SystemTime::now()
+            .duration_since(web_time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as usize;
+
+        if let Some(return_time) = flight.return_time {
+            if return_time < now {
+                self.ships.add_ships(&flight.ships)?;
+
+                return Ok(());
+            }
+        }
+
+        if flight.arrival_time > now {
+            return Err(Error::FlightNotArrived);
+        }
+
+        match flight.mission {
+            MissionType::Transport => {
+                self.resources += flight.resources;
+            }
+            MissionType::Station => {
+                self.ships.add_ships(&flight.ships)?;
+                self.resources += flight.resources;
+            }
+            _ => unimplemented!(),
+        }
+
+        Ok(())
     }
 }

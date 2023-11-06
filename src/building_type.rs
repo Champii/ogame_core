@@ -76,3 +76,15 @@ impl BuildCost for BuildingType {
         }
     }
 }
+
+impl From<String> for BuildingType {
+    fn from(s: String) -> Self {
+        match s.as_str() {
+            "Metal" => BuildingType::Metal,
+            "Crystal" => BuildingType::Crystal,
+            "Deuterium" => BuildingType::Deuterium,
+            "Shipyard" => BuildingType::Shipyard,
+            _ => panic!("Unknown building type"),
+        }
+    }
+}

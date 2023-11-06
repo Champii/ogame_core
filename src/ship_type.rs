@@ -122,3 +122,25 @@ impl BuildCost for ShipType {
         }
     }
 }
+
+impl From<String> for ShipType {
+    fn from(s: String) -> Self {
+        match s.as_str() {
+            "Small Cargo" => ShipType::SmallCargo,
+            "Large Cargo" => ShipType::LargeCargo,
+            "Colony Ship" => ShipType::ColonyShip,
+            "Recycler" => ShipType::Recycler,
+            "Espionage Probe" => ShipType::EspionageProbe,
+            "Solar Satellite" => ShipType::SolarSatellite,
+            "Light Fighter" => ShipType::LightFighter,
+            "Heavy Fighter" => ShipType::HeavyFighter,
+            "Cruiser" => ShipType::Cruiser,
+            "Battleship" => ShipType::Battleship,
+            "Bomber" => ShipType::Bomber,
+            "Destroyer" => ShipType::Destroyer,
+            "Battlecruiser" => ShipType::Battlecruiser,
+            "Deathstar" => ShipType::Deathstar,
+            _ => panic!("Unknown ship type: {}", s),
+        }
+    }
+}

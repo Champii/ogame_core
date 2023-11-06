@@ -9,7 +9,7 @@ pub enum Protocol {
 
     // Client -> Server
     UpgradeBuilding {
-        planet_id: usize,
+        planet_id: String,
         building_type: BuildingType,
     },
 }
