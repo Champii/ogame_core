@@ -61,11 +61,7 @@ impl Game {
         Ok(())
     }
 
-    pub fn upgrade_building(
-        &mut self,
-        planet_id: String,
-        building_type: BuildingType,
-    ) -> Result<()> {
+    fn upgrade_building(&mut self, planet_id: String, building_type: BuildingType) -> Result<()> {
         self.tick()?;
 
         self.planets
@@ -76,7 +72,7 @@ impl Game {
         Ok(())
     }
 
-    pub fn process_flights(&mut self) -> Result<()> {
+    fn process_flights(&mut self) -> Result<()> {
         self.tick()?;
 
         let now = web_time::SystemTime::now()
@@ -103,12 +99,7 @@ impl Game {
         Ok(())
     }
 
-    pub fn buy_ship(
-        &mut self,
-        planet_id: String,
-        ship_type: ShipType,
-        amount: usize,
-    ) -> Result<()> {
+    fn buy_ship(&mut self, planet_id: String, ship_type: ShipType, amount: usize) -> Result<()> {
         self.tick()?;
 
         self.planets
@@ -119,7 +110,7 @@ impl Game {
         Ok(())
     }
 
-    pub fn create_flight(
+    fn create_flight(
         &mut self,
         from_planet_id: String,
         to_planet_id: String,
@@ -152,7 +143,7 @@ impl Game {
         Ok(flight)
     }
 
-    pub fn add_planet(&mut self, planet: Planet) {
+    fn add_planet(&mut self, planet: Planet) {
         self.planets.insert(planet.id.clone(), planet);
     }
 }
